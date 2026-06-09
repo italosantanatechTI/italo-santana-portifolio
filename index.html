@@ -645,7 +645,7 @@ footer .heart { color: var(--accent3); }
         </div>
       </div>
 
-      <div class="project-card" style="cursor:pointer" onclick="document.getElementById('rmm-modal').style.display='flex'">
+      <div class="project-card" style="cursor:pointer" onclick="document.getElementById('rmm-modal').classList.add('open')">
         <div class="top">
           <div class="icon green"><i class="fas fa-shield-alt"></i></div>
           <h3>Tactical RMM - Monitoramento</h3>
@@ -849,18 +849,106 @@ cards.forEach(c => {
 });
 </script>
 
-<div id="rmm-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+<div id="rmm-modal" onclick="if(event.target===this)this.classList.remove('open')" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:1100px;height:85vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-weight:700;font-size:1rem">Tactical RMM — Demo</div>
         <div style="color:var(--text2);font-size:.8rem">Visualização do ambiente de demonstração</div>
       </div>
-      <button onclick="document.getElementById('rmm-modal').style.display='none'" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer">Fechar</button>
+      <button onclick="document.getElementById('rmm-modal').classList.remove('open')" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer">Fechar</button>
     </div>
     <iframe src="https://demo.tacticalrmm.com/" style="flex:1;width:100%;border:0;background:#fff" allow="camera; microphone; fullscreen"></iframe>
   </div>
 </div>
+
+<div id="homelab-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:900px;height:80vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:700;font-size:1rem">HomeLab Server — Terminal</div>
+        <div style="color:var(--text2);font-size:.8rem">Simulação interativa do ambiente</div>
+      </div>
+      <button onclick="document.getElementById('homelab-modal').style.display='none'" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer">Fechar</button>
+    </div>
+    <div style="flex:1;background:#0b0b10;color:#d4d4d4;font-family:'JetBrains Mono',monospace;font-size:.85rem;padding:18px;overflow:auto" id="terminal">
+      <p style="margin:0;line-height:1.6;color:#8b949e"> Último login: terça 09 jun 2026 10:12:03 -0300 em tty1</p>
+      <p style="margin:0;line-height:1.6;color:#8b949e"> Linux homelab 5.15.0-126-generic #137-Ubuntu SMP x86_64 GNU/Linux</p>
+      <p style="margin:0;line-height:1.6;color:#8b949e"></p>
+      <p style="margin:0;line-height:1.6;color:#58a6ff"> ✔ Serviços ativos: sshd, docker, nginx, redis-server, mysql, nextcloud</p>
+      <p style="margin:0;line-height:1.6;color:#8b949e"></p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="color:#00d4aa">italo@homelab:~$</span>
+        <input id="term-input" style="flex:1;background:transparent;border:0;color:#e6edf3;font-family:inherit;font-size:inherit;outline:none" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const input = document.getElementById('term-input');
+  if(!input) return;
+  const history = [];
+  let idx = -1;
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      const term = document.getElementById('terminal');
+      const cmd = input.value.trim();
+      input.value = '';
+      const line = document.createElement('p');
+      line.style.cssText = 'margin:0;line-height:1.6;white-space:pre-wrap;word-break:break-word';
+      line.innerHTML = '<span style="color:#00d4aa">italo@homelab:~$</span> ' + (cmd || ' ');
+      term.insertBefore(line, term.lastElementChild);
+      if(cmd){
+        history.unshift(cmd);
+        idx = -1;
+        const out = document.createElement('p');
+        out.style.cssText = 'margin:0;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:#8b949e';
+        const c = cmd.toLowerCase();
+        if(['help','ajuda'].includes(c)){
+          out.innerHTML = ' Comandos: help, ls, pwd, whoami, date, uptime, free, docker ps, neofetch, uname -a';
+          out.style.color = '#58a6ff';
+        } else if(c === 'ls'){
+          out.innerHTML = ' docker  nextcloud  nginx  redis  scripts  mysql  backups  proxmox';
+          out.style.color = '#3fb950';
+        } else if(c === 'pwd'){
+          out.innerHTML = ' /home/italo';
+        } else if(c === 'whoami'){
+          out.innerHTML = ' italo';
+        } else if(c === 'date'){
+          out.innerHTML = ' ' + new Date().toString();
+        } else if(c === 'uptime'){
+          out.innerHTML = ' ' + new Date().toLocaleString() + ' up 42 days, 3 users, load: 0.08 0.12 0.10';
+        } else if(c === 'free'){
+          out.innerHTML = ' Mem: 15Gi used  2.1Gi free  17.2Gi total';
+          out.style.color = '#3fb950';
+        } else if(c === 'uname -a'){
+          out.innerHTML = ' Linux homelab 5.15.0-126-generic #137-Ubuntu SMP x86_64 GNU/Linux';
+        } else if(c === 'neofetch'){
+          out.innerHTML = '  ██████  ███    ███  ██████  ██       ██████\n' +
+            '  ██      ████  ████  ██    ██ ██      ██    ██\n' +
+            '  █████   ██ ████ ██  ██████  ██      ████████\n' +
+            '  ██      ██  ██  ██  ██      ██      ██    ██\n' +
+            '  ██████  ██      ██  ██████  ███████ ██    ██';
+          out.style.color = '#3fb950';
+        } else {
+          out.innerHTML = ' bash: ' + cmd + ': comando não encontrado';
+          out.style.color = '#d29922';
+        }
+        term.insertBefore(out, term.lastElementChild);
+        term.scrollTop = term.scrollHeight;
+      }
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      if(history.length && idx < history.length - 1){ idx++; input.value = history[idx]; }
+    } else if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      if(idx > 0){ idx--; input.value = history[idx]; } else { idx = -1; input.value = ''; }
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
