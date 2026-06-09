@@ -645,7 +645,7 @@ footer .heart { color: var(--accent3); }
         </div>
       </div>
 
-      <div class="project-card">
+      <div class="project-card" style="cursor:pointer" onclick="document.getElementById('rmm-modal').style.display='flex'">
         <div class="top">
           <div class="icon green"><i class="fas fa-shield-alt"></i></div>
           <h3>Tactical RMM - Monitoramento</h3>
@@ -848,5 +848,19 @@ cards.forEach(c => {
   observer.observe(c);
 });
 </script>
+
+<div id="rmm-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:1100px;height:85vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:700;font-size:1rem">Tactical RMM — Demo</div>
+        <div style="color:var(--text2);font-size:.8rem">Visualização do ambiente de demonstração</div>
+      </div>
+      <button onclick="document.getElementById('rmm-modal').style.display='none'" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer">Fechar</button>
+    </div>
+    <iframe src="https://demo.tacticalrmm.com/" style="flex:1;width:100%;border:0;background:#fff" allow="camera; microphone; fullscreen"></iframe>
+  </div>
+</div>
+
 </body>
 </html>
